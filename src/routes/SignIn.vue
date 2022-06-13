@@ -6,7 +6,7 @@
     <div class="d-flex">
       <v-spacer />
       <v-btn color="secondary" text class="mr-2" to="/sign-up">Create a new account</v-btn>
-      <v-btn color="primary" dark to="/sites">Sign-In</v-btn>
+      <v-btn color="primary" dark @click="signIn()">Sign-In</v-btn>
     </div>
   </div>
 </template>
@@ -25,6 +25,11 @@ export default class SignIn extends RouteComponentBase {
 
   public constructor() {
     super('Sign In', LayoutType.Auth);
+  }
+
+  public signIn(): void {
+    localStorage.setItem('token', '111');
+    this.$router.push('/sites');
   }
 }
 </script>

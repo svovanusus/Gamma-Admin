@@ -15,6 +15,7 @@ import StoreState from 'store/StoreState';
 import MainLayoutComponent from 'components/layout/MainLayoutComponent.vue';
 import AuthLayoutComponent from 'components/layout/AuthLayoutComponent.vue';
 import PageLayoutComponent from 'components/layout/PageLayoutComponent.vue';
+import { StoreActions } from 'store/StoreTypes';
 
 @Component({
   name: '',
@@ -37,6 +38,11 @@ export default class AppComponent extends Vue {
 
   public get layoutComponentName(): string {
     return this.layout?.layoutComponent ?? 'div';
+  }
+
+  public mounted(): void {
+    this.$store.dispatch(StoreActions.FETCH_DOMAINS);
+    this.$store.dispatch(StoreActions.FETCH_SITES);
   }
 }
 </script>

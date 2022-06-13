@@ -20,5 +20,12 @@ import AppDrawer from 'components/layout/parts/AppDrawer.vue';
     AppDrawer
   },
 })
-export default class MainLayoutComponent extends Vue {}
+export default class MainLayoutComponent extends Vue {
+  public mounted(): void {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.$router.replace('/sign-in');
+    }
+  }
+}
 </script>

@@ -39,5 +39,12 @@ export default class AuthLayoutComponent extends Vue {
   public get state(): StoreState {
     return this.$store.state;
   }
+
+  public mounted(): void {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.$router.replace('/sites');
+    }
+  }
 }
 </script>

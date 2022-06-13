@@ -2,7 +2,7 @@
   <div class="page pa-4">
     <div class="actions d-flex mb-4">
       <v-spacer />
-      <v-btn color="primary" dark @click="createDialogState = true">
+      <v-btn color="primary" dark @click="openAddDialog()">
         <v-icon>mdi-plus</v-icon>
         Create New
       </v-btn>
@@ -12,6 +12,10 @@
       :items="state.sites"
       class="elevation-1"
     >
+      <template v-slot:item.name="{ item }">
+        <a :href="`http://localhost:3000/site/${item.id}`" v-text="item.name" />
+      </template>
+
       <template v-slot:item.lastUpdate="{ item }">
         <span v-text="formatDate(item.lastUpdate)" />
       </template>
@@ -46,14 +50,14 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
-          <v-text-field outlined dense hide-details label="Domain Name" class="mb-2" />
-          <v-select :items="domains" label="Domain" item-value="id" item-text="name" outlined dense hide-details class="mb-2" />
-          <v-textarea label="Description" outlined dense hide-details />
+          <v-text-field v-model="createSiteName" outlined dense hide-details label="Domain Name" class="mb-2" />
+          <v-select v-model="createSiteDomainId" :items="domains" label="Domain" item-value="id" item-text="name" outlined dense hide-details class="mb-2" />
+          <v-textarea v-model="cerateSiteDescription" label="Description" outlined dense hide-details />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="secondary" dark @click="createDialogState = false">Cancel</v-btn>
-          <v-btn color="primary" @click="createDialogState = false">Add</v-btn>
+          <v-btn color="secondary" dark @click="closeAddDialog()">Cancel</v-btn>
+          <v-btn color="primary" @click="addSite()">Add</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -72,8 +76,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="secondary" dark @click="deleteDialogState = false">Cancel</v-btn>
-          <v-btn color="red" dark @click="deleteDialogState = false">Delete</v-btn>
+          <v-btn color="secondary" dark @click="cancelRemove()">Cancel</v-btn>
+          <v-btn color="red" dark @click="removeSite()">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -85,6 +89,7 @@ import { Component } from 'vue-property-decorator';
 import RouteComponentBase from 'routes/RouteComponentBase';
 import Site from 'model/remote/Site';
 import Domain from 'model/remote/Domain';
+import { StoreMutations } from 'store/StoreTypes';
 
 @Component({
   name: 'SiteList',
@@ -93,6 +98,11 @@ import Domain from 'model/remote/Domain';
 export default class SiteList extends RouteComponentBase {
   public createDialogState: boolean = false;
   public deleteDialogState: boolean = false;
+
+  public createSiteName: string = '';
+  public createSiteDomainId: number = null;
+  public cerateSiteDescription: string = '';
+  public siteToDelete: number = null;
 
   public headers = [
     { text: 'Site Name', value: 'name' },
@@ -124,11 +134,51 @@ export default class SiteList extends RouteComponentBase {
   }
 
   public itemDeleteClick(item: Site): void {
+    this.siteToDelete = item.id
     this.deleteDialogState = true;
   }
 
   private isDomainUsed(id: number): boolean {
     return this.state.sites.some(x => x.domainId === id);
+  }
+
+  public openAddDialog(): void {
+    this.createSiteName = '';
+    this.createSiteDomainId = null;
+    this.cerateSiteDescription = '';
+    this.createDialogState = true;
+  }
+
+  public closeAddDialog(): void {
+    this.createDialogState = false;
+    this.createSiteName = '';
+    this.createSiteDomainId = null;
+    this.cerateSiteDescription = '';
+  }
+
+  public addSite(): void {
+    const newSite = <Site>{
+      id: Math.ceil(Math.random() * 1000),
+      name: this.createSiteName,
+      domainId: this.createSiteDomainId,
+      isPublished: false,
+      description: this.cerateSiteDescription,
+      lastUpdate: new Date(),
+    };
+
+    this.$store.commit(StoreMutations.ADD_SITE, newSite);
+    this.closeAddDialog();
+  }
+
+  public cancelRemove(): void {
+    this.deleteDialogState = false;
+    this.siteToDelete = null;
+  }
+
+  public removeSite(): void {
+    if (!this.siteToDelete) return;
+    this.$store.commit(StoreMutations.REMOVE_SITE, this.siteToDelete);
+    this.cancelRemove();
   }
 }
 </script>

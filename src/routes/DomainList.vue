@@ -2,7 +2,7 @@
   <div class="page pa-4">
     <div class="actions d-flex mb-4">
       <v-spacer />
-      <v-btn color="primary" dark @click="createDialogState = true">
+      <v-btn color="primary" dark @click="openAddDialog()">
         <v-icon>mdi-plus</v-icon>
         Add New
       </v-btn>
@@ -37,12 +37,12 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
-          <v-text-field outlined dense hide-details label="Domain Name" />
+          <v-text-field v-model="createDomainName" outlined dense hide-details label="Domain Name" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="secondary" dark @click="createDialogState = false">Cancel</v-btn>
-          <v-btn color="primary" @click="createDialogState = false">Add</v-btn>
+          <v-btn color="secondary" dark @click="closeAddDialog()">Cancel</v-btn>
+          <v-btn color="primary" @click="addDomain()">Add</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -61,8 +61,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="secondary" dark @click="deleteDialogState = false">Cancel</v-btn>
-          <v-btn color="red" dark @click="deleteDialogState = false">Delete</v-btn>
+          <v-btn color="secondary" dark @click="cancelRemove()">Cancel</v-btn>
+          <v-btn color="red" dark @click="removeDomain()">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -73,6 +73,7 @@
 import { Component } from 'vue-property-decorator';
 import RouteComponentBase from 'routes/RouteComponentBase';
 import Domain from 'model/remote/Domain';
+import { StoreMutations } from 'store/StoreTypes';
 
 @Component({
   name: 'DomainList',
@@ -81,6 +82,9 @@ import Domain from 'model/remote/Domain';
 export default class DomainList extends RouteComponentBase {
   public createDialogState: boolean = false;
   public deleteDialogState: boolean = false;
+
+  public createDomainName: string = '';
+  public domainToRemove: number = null;
 
   public headers = [
     { text: 'Domain Name', value: 'name' },
@@ -101,7 +105,40 @@ export default class DomainList extends RouteComponentBase {
   }
 
   public itemDeleteClick(item: Domain): void {
+    this.domainToRemove = item.id
     this.deleteDialogState = true;
+  }
+
+  public openAddDialog(): void {
+    this.createDomainName = '';
+    this.createDialogState = true;
+  }
+
+  public closeAddDialog(): void {
+    this.createDialogState = false;
+    this.createDomainName = '';
+  }
+
+  public addDomain(): void {
+    const newDomain = <Domain>{
+      id: Math.ceil(Math.random() * 1000),
+      name: this.createDomainName,
+      createDate: new Date(),
+    };
+
+    this.$store.commit(StoreMutations.ADD_DOMAIN, newDomain);
+    this.closeAddDialog();
+  }
+
+  public cancelRemove(): void {
+    this.deleteDialogState = false;
+    this.domainToRemove = null;
+  }
+
+  public removeDomain(): void {
+    if (!this.domainToRemove) return;
+    this.$store.commit(StoreMutations.REMOVE_DOMAIN, this.domainToRemove);
+    this.cancelRemove();
   }
 }
 </script>

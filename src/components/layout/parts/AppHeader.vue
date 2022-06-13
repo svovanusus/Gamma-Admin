@@ -9,7 +9,7 @@
     <v-spacer />
 
     <v-btn text to="/profile" class="mr-2">Profile</v-btn>
-    <v-btn text to="/sign-in">Exit</v-btn>
+    <v-btn text @click="exit()">Exit</v-btn>
   </v-app-bar>
 </template>
 
@@ -24,6 +24,11 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class AppHeader extends Vue {
   public get state(): StoreState {
     return this.$store.state;
+  }
+
+  public exit(): void {
+    localStorage.removeItem('token');
+    this.$router.push('/sign-in');
   }
 }
 </script>
