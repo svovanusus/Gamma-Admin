@@ -1,7 +1,7 @@
 <template>
   <div class="sign-in">
-    <v-text-field outlined dense hide-details type="text" label="Login" class="mb-4" />
-    <v-text-field outlined dense hide-details type="password" label="Password" class="mb-4" />
+    <v-text-field v-model="login" outlined dense hide-details type="text" label="Login" class="mb-4" @input="showError = false" />
+    <v-text-field v-model="password" outlined dense hide-details type="password" label="Password" class="mb-4" @input="showError = false" />
     <p v-if="showError" class="red--text mb-4">Incorrect Login or Password</p>
     <div class="d-flex">
       <v-spacer />
@@ -23,13 +23,21 @@ import { LayoutType } from 'model/Enums';
 export default class SignIn extends RouteComponentBase {
   public showError = false;
 
+  public login: string = '';
+  public password: string = '';
+
   public constructor() {
     super('Sign In', LayoutType.Auth);
   }
 
   public signIn(): void {
-    localStorage.setItem('token', '111');
-    this.$router.push('/sites');
+    if (this.login === 'admin' && this.password === '123456') {
+      localStorage.setItem('token', '111');
+      this.$router.push('/sites');
+    } else {
+      this.showError = true;
+      this.password = '';
+    }
   }
 }
 </script>
